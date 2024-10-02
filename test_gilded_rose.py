@@ -11,6 +11,29 @@ class GildedRoseTest(unittest.TestCase):
         gilded_rose.update_quality()
         self.assertEquals("fixme", items[0].name)
 
+    def test_aged_brie_quality_increases(self):
+        aged_brie = "Aged Brie"
+        items = [Item(aged_brie, 2, 0), Item(aged_brie, 0, 48)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(gr.items, [Item(aged_brie, 1, 1), Item(aged_brie, -1, 50)])
+
+    def test_quality_degrades_twice_after_sell_date(self):
+        dexterity_vest = "+5 Dexterity Vest"
+        items = [Item(dexterity_vest, 0, 20), Item(dexterity_vest, -1, 10)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(gr.items, [Item(dexterity_vest, -1, 18), Item(dexterity_vest, -2, 8)])
+
+    def test_quality_never_exceeds_fifty(self):
+        aged_brie = "Aged Brie"
+        backstage = "Backstage passes to a TAFKAL80ETC concert"
+        items = [Item(aged_brie, 2, 50), Item(backstage, 10, 49), Item(backstage, 5, 48)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(gr.items, [Item(aged_brie, 1, 50), Item(backstage, 9, 50), Item(backstage, 4, 50)])
+
+
 
 if __name__ == '__main__':
     unittest.main()
