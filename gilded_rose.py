@@ -20,30 +20,41 @@ class GildedRose(object):
 
     def update_quality(self):
         for item in self.items:
-            if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert":
-                if item.quality > 0:
-                    if item.name != "Sulfuras, Hand of Ragnaros":
-                        item.quality = item.quality - 1
-            else:
+            # "Sulfuras, Hand of Ragnaros" does not change
+            if item.name == "Sulfuras, Hand of Ragnaros":
+                continue
+
+            # Decrease the sell_in value for every item except "Sulfuras"
+            item.sell_in -= 1
+
+            if item.name == "Aged Brie":
+                # Aged Brie increases in quality as it ages
                 if item.quality < 50:
-                    item.quality = item.quality + 1
-                    if item.name == "Backstage passes to a TAFKAL80ETC concert":
-                        if item.sell_in < 11:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-                        if item.sell_in < 6:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-            if item.name != "Sulfuras, Hand of Ragnaros":
-                item.sell_in = item.sell_in - 1
-            if item.sell_in < 0:
-                if item.name != "Aged Brie":
-                    if item.name != "Backstage passes to a TAFKAL80ETC concert":
-                        if item.quality > 0:
-                            if item.name != "Sulfuras, Hand of Ragnaros":
-                                item.quality = item.quality - 1
-                    else:
-                        item.quality = item.quality - item.quality
-                else:
-                    if item.quality < 50:
-                        item.quality = item.quality + 1
+                    item.quality += 1
+                # If sell_in is negative, increase quality again
+                if item.sell_in < 0 and item.quality < 50:
+                    item.quality += 1
+
+            elif item.name == "Backstage passes to a TAFKAL80ETC concert":
+                # Backstage passes quality increases as the sell_in approaches
+                if item.sell_in >= 10:
+                    item.quality += 1
+                elif 5 <= item.sell_in < 10:
+                    item.quality += 2
+                elif 0 <= item.sell_in < 5:
+                    item.quality += 3
+                # Once the concert is over, quality drops to 0
+                if item.sell_in < 0:
+                    item.quality = 0
+
+            else:
+                # Normal items quality degrades
+                if item.quality > 0:
+                    item.quality -= 1
+                # If sell_in is negative, degrade quality twice as fast
+                if item.sell_in < 0 and item.quality > 0:
+                    item.quality -= 1
+
+            # Ensure quality does not exceed 50 for all items
+            if item.quality > 50:
+                item.quality = 50
